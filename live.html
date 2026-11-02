@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hồ Câu Săn Thủy Quái — TikTok LIVE</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100%; background:#04140b; overflow:hidden; font-family:"Segoe UI",Arial,sans-serif; color:#fff; }
+  #stage { position:relative; margin:0 auto; height:100vh; height:100dvh; aspect-ratio:9/16; max-width:100vw;
+    background:radial-gradient(120% 60% at 50% 0%, #0d3b22 0%, #072616 45%, #04170d 100%);
+    display:flex; flex-direction:column; overflow:hidden; }
+  @media (max-aspect-ratio: 9/16) { #stage { width:100vw; height:auto; } }
+
+  /* ---------- Thanh tiêu đề ---------- */
+  #topbar { padding:8px 10px 4px; text-align:center; position:relative; z-index:30; }
+  #title { display:inline-block; padding:5px 18px 7px; border:2px solid #d8a723; border-radius:12px;
+    background:linear-gradient(180deg,#5d4305,#2e2002); box-shadow:0 0 14px #d8a72366, inset 0 0 12px #000;
+    font-size:21px; font-weight:900; letter-spacing:1px; color:#ffd94d; text-shadow:0 2px 0 #7a5200, 0 0 12px #ffb30088; }
+  #subtitle { margin-top:3px; font-size:11px; color:#b7f0c9; letter-spacing:.6px; }
+  #connRow { position:absolute; top:8px; left:8px; display:flex; flex-direction:column; gap:4px; align-items:flex-start; }
+  .pill { font-size:10px; padding:3px 8px; border-radius:20px; background:#000a; border:1px solid #3fae6a; color:#9fe8bb; white-space:nowrap; }
+  .pill.bad { border-color:#e5534b; color:#ffb3ae; }
+  #topBtns { position:absolute; top:8px; right:8px; display:flex; gap:5px; }
+  .tbtn { font-size:11px; padding:4px 9px; border-radius:8px; border:1px solid #d8a723aa; background:#1c2b12cc; color:#ffe27a; cursor:pointer; }
+  .tbtn.off { opacity:.45; }
+
+  /* ---------- Hai bảng trên ---------- */
+  #boards { display:flex; gap:7px; padding:5px 9px 2px; z-index:20; }
+  .board { flex:1; border:1.6px solid #d8a723; border-radius:10px; background:#071d10e6; padding:6px 9px; font-size:11.5px; line-height:1.5; min-height:74px; }
+  .board.right { border-color:#37b6c9; }
+  .board h3 { font-size:12px; color:#ffd94d; letter-spacing:.5px; margin-bottom:2px; }
+  .board.right h3 { color:#7fe7f7; }
+  .board .dim { color:#a9cdb2; font-size:10.5px; }
+  .board b { color:#fff; }
+  .gold { color:#ffd94d; }
+
+  #goldenBanner { display:none; margin:4px 9px 0; text-align:center; font-size:12.5px; font-weight:800; color:#231a00;
+    background:linear-gradient(90deg,#ffcf3d,#ffe98a,#ffcf3d); border-radius:9px; padding:4px 6px; z-index:20;
+    box-shadow:0 0 16px #ffcf3daa; animation:goldPulse 1s infinite alternate; }
+  @keyframes goldPulse { from { filter:brightness(1); } to { filter:brightness(1.2); } }
+
+  /* ---------- Hồ câu ---------- */
+  #pondWrap { position:relative; flex:1; min-height:0; margin:2px 2px 0; }
+  #pondCanvas { position:absolute; inset:0; width:100%; height:100%; }
+  #lineSvg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+  .seat { position:absolute; width:86px; transform:translate(-50%,-50%); text-align:center; z-index:12; transition:opacity .4s; }
+  .avatar { width:44px; height:44px; margin:0 auto; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:19px; font-weight:900; color:#fff; border:2.4px solid #ffd94d; box-shadow:0 2px 8px #000c; position:relative; }
+  .seat.biting .avatar { animation:shake .16s infinite; border-color:#ff4747; }
+  @keyframes shake { 0%{transform:translate(0,0)} 25%{transform:translate(1.6px,-1px)} 75%{transform:translate(-1.6px,1px)} 100%{transform:translate(0,0)} }
+  .nametag { margin-top:2px; display:inline-block; max-width:86px; padding:1px 7px; border-radius:7px; background:#04150add;
+    border:1px solid #ffd94d88; font-size:10.5px; font-weight:700; color:#ffe9a3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .baitlab { font-size:9.5px; color:#c9f4d6; text-shadow:0 1px 2px #000; margin-top:1px; }
+  .plaque { position:absolute; left:50%; bottom:calc(100% + 4px); transform:translateX(-50%); width:128px; z-index:25;
+    background:#12060ee8; border:1.6px solid #37b6c9; border-radius:9px; padding:4px 6px; font-size:10.5px; line-height:1.35;
+    box-shadow:0 3px 10px #000b; display:none; }
+  .plaque.show { display:block; }
+  .plaque .ptag { display:inline-block; background:#0e5a6d; color:#aef3ff; font-weight:800; font-size:9px; padding:0 5px; border-radius:4px; letter-spacing:.4px; }
+  .plaque.bite { border-color:#ff4747; width:142px; }
+  .plaque.bite .ptag { background:#c81e1e; color:#fff; }
+  .plaque.bite .bignum { font-size:17px; font-weight:900; color:#ffd94d; }
+  .plaque.catchp { border-color:#ffd94d; }
+  .plaque.catchp .ptag { background:#8a6400; color:#ffe9a3; }
+  .plaque .pname { color:#ffd94d; font-weight:800; }
+  .plaque .ptext { font-style:italic; color:#eaf7ee; }
+
+  #catchCard { position:absolute; left:50%; top:6%; transform:translateX(-50%) scale(.8); width:78%; max-width:330px; z-index:40;
+    border-radius:13px; padding:9px 12px; text-align:center; opacity:0; pointer-events:none; transition:all .25s; }
+  #catchCard.show { opacity:1; transform:translateX(-50%) scale(1); }
+  #catchCard .cfish { font-size:19px; font-weight:900; }
+  #catchCard .cdetail { font-size:13px; margin-top:2px; }
+  #catchCard .cowner { font-size:11.5px; opacity:.9; margin-top:1px; }
+
+  /* ---------- Ticker + hướng dẫn ---------- */
+  #ticker { margin:3px 9px 0; background:#0009; border:1px solid #2c6e46; border-radius:8px; padding:4px 9px;
+    font-size:11px; color:#ffe9a3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; z-index:20; }
+  #guide { margin:5px 9px 8px; border:1.6px solid #37b6c9; border-radius:10px; background:#06202ae6; padding:6px 10px;
+    font-size:11px; line-height:1.55; color:#d8f6ff; z-index:20; }
+  #guide b { color:#7fe7f7; }
+  #guide .xu { color:#ffd94d; }
+
+  /* ---------- Panel điều khiển ---------- */
+  #panel { position:absolute; right:8px; top:64px; width:212px; z-index:60; background:#04150af2; border:1.6px solid #d8a723;
+    border-radius:11px; padding:9px 10px; font-size:12px; display:none; }
+  #panel.show { display:block; }
+  #panel h4 { color:#ffd94d; font-size:12.5px; margin-bottom:6px; }
+  #panel button { display:block; width:100%; margin:4px 0; padding:6px 8px; border-radius:7px; border:1px solid #3fae6a;
+    background:#0b2c17; color:#c9f4d6; cursor:pointer; font-size:12px; text-align:left; }
+  #panel .note { color:#a9cdb2; font-size:10.5px; line-height:1.45; margin-top:5px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="topbar">
+    <div id="connRow">
+      <span class="pill" id="connStatus">Đang nối cầu nối…</span>
+      <span class="pill" id="viewersBox">👁 0</span>
+    </div>
+    <div id="title">🎣 HỒ CÂU SĂN THỦY QUÁI</div>
+    <div id="subtitle">★ ĐẦM SĂN THỦY QUÁI &amp; CÁ KHỦNG TIKTOK LIVE ★</div>
+    <div id="topBtns">
+      <button class="tbtn" id="btnVoice">🔊 Giọng Nói</button>
+      <button class="tbtn" id="btnPanel">⚙ Panel</button>
+    </div>
+  </div>
+
+  <div id="boards">
+    <div class="board">
+      <h3>🏆 BẢNG VINH DANH</h3>
+      <div>👑 VUA SÁT CÁ: <b id="topAngler">—</b></div>
+      <div class="dim" id="topAnglerSub">Chưa ai câu được cá</div>
+      <div>🐋 KỶ LỤC: <b class="gold" id="recordFish">—</b></div>
+      <div class="dim" id="recordSub"></div>
+    </div>
+    <div class="board right">
+      <h3>🌊 HỒ CÂU SÔI ĐỘNG</h3>
+      <div>🎣 Cần thủ: <b id="statAnglers">0</b> người đang câu</div>
+      <div>🔴 Cá cắn câu: <b id="statBiting">0</b> phao nhấp nháy</div>
+      <div class="dim">💬 Chat “câu cá” nhận Cần Tre · ❤️ Thả tim hoặc chat “giật” để giật cá lên</div>
+      <div class="dim">🎁 Tặng quà lên Cần VIP &amp; săn Thần Long</div>
+    </div>
+  </div>
+
+  <div id="goldenBanner">⏰ GIỜ VÀNG — X2 XU MỌI CON CÁ · CÁ HỒI VÀNG XUẤT HIỆN NHIỀU HƠN! ⏰</div>
+
+  <div id="pondWrap">
+    <canvas id="pondCanvas"></canvas>
+    <svg id="lineSvg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+    <div id="catchCard"></div>
+  </div>
+
+  <div id="ticker">🎣 Chat “câu cá” để nhận Cần Tre miễn phí và vào chỗ ngồi quanh hồ!</div>
+
+  <div id="guide">
+    🎧 <b>HƯỚNG DẪN CÂU CÁ TIKTOK LIVE:</b><br>
+    • Chat <b>“câu cá”</b> để nhận Cần Tre miễn phí và vào chỗ ngồi<br>
+    • Khi phao cắn câu → <b>thả tim ❤️</b> hoặc chat <b>“giật”</b> thật nhanh để kéo cá lên mặt nước<br>
+    • <span class="xu">1 xu: +50 mồi | 5 xu: +50 mồi VIP | 30 xu: Cần VIP | 100 xu: Cần VIP2 | 500 xu: Cần Thần Long</span>
+  </div>
+
+  <div id="panel">
+    <h4>⚙ BẢNG ĐIỀU KHIỂN HỒ CÂU</h4>
+    <button id="btnDemo">🧪 Bật giả lập Demo (test không cần live)</button>
+    <button id="btnSound">🔔 Âm thanh: Bật</button>
+    <button id="btnTts">🗣 Đọc cảm ơn / cá khủng: Bật</button>
+    <button id="btnResetRec">🗑 Xoá kỷ lục lưu trên máy</button>
+    <div class="note">Chạy thật: mở cầu nối <b>node bridge.js ten_tiktok</b> rồi mở trang qua http://localhost:21214. Demo trong cầu nối: <b>node bridge.js --demo</b>.</div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ================= DỮ LIỆU CÁ & CẦN ================= */
+const TIERS = [
+  { name:'Thường',    color:'#9fe8bb' },
+  { name:'Hiếm',      color:'#7fe7f7' },
+  { name:'VIP',       color:'#ffd94d' },
+  { name:'Khủng',     color:'#ff9d4d' },
+  { name:'Thủy Quái', color:'#ff5df2' },
+];
+// rate = xu mỗi kg; w = trọng số trong hạng
+const FISH = [
+  { name:'Cá Hề Nemo Hoàng Tử', emoji:'🐠', tier:0, minKg:0.15, maxKg:1.1,  minCm:12, maxCm:26,  rate:90, w:70,  color:'#ff8c42' },
+  { name:'Cá Rô Phi',           emoji:'🐟', tier:0, minKg:0.3,  maxKg:2.5,  minCm:20, maxCm:35,  rate:30, w:100, color:'#8fae94' },
+  { name:'Cá Diêu Hồng',        emoji:'🐠', tier:0, minKg:0.4,  maxKg:2.8,  minCm:22, maxCm:38,  rate:34, w:85,  color:'#ff7d9c' },
+  { name:'Cá Chép',             emoji:'🐟', tier:0, minKg:0.5,  maxKg:3.5,  minCm:25, maxCm:45,  rate:32, w:90,  color:'#d9a441' },
+  { name:'Cá Trê',              emoji:'🐟', tier:0, minKg:0.8,  maxKg:4.5,  minCm:35, maxCm:60,  rate:28, w:80,  color:'#6b7c8c' },
+  { name:'Cá Chim Vàng',        emoji:'🐠', tier:1, minKg:1.5,  maxKg:6,    minCm:30, maxCm:55,  rate:55, w:50,  color:'#ffd94d' },
+  { name:'Cá Lóc Bông',         emoji:'🐟', tier:1, minKg:2,    maxKg:7,    minCm:45, maxCm:75,  rate:45, w:55,  color:'#5d8a4a' },
+  { name:'Cá Tai Tượng',        emoji:'🐟', tier:1, minKg:3,    maxKg:9,    minCm:50, maxCm:80,  rate:50, w:40,  color:'#a08c5a' },
+  { name:'Cá Tầm',              emoji:'🐟', tier:1, minKg:3,    maxKg:10,   minCm:60, maxCm:110, rate:60, w:45,  color:'#7a8b99' },
+  { name:'Cá Chép Koi Vàng',    emoji:'🐠', tier:2, minKg:8,    maxKg:20,   minCm:55, maxCm:85,  rate:22, w:40,  color:'#ffcf3d' },
+  { name:'Cá Ngừ Vây Vàng',     emoji:'🐟', tier:2, minKg:10,   maxKg:30,   minCm:80, maxCm:130, rate:12, w:35,  color:'#4a7fb5' },
+  { name:'Cá Hồi Vàng Alaska',  emoji:'🐠', tier:2, minKg:15,   maxKg:40,   minCm:70, maxCm:105, rate:15, w:45,  color:'#ffb347' },
+  { name:'Cá Tra Dầu',          emoji:'🐟', tier:3, minKg:40,   maxKg:90,   minCm:130,maxCm:190, rate:10, w:40,  color:'#5a6e7a' },
+  { name:'Cá Hô Khổng Lồ',      emoji:'🐟', tier:3, minKg:50,   maxKg:120,  minCm:140,maxCm:210, rate:10, w:35,  color:'#8c6d4a' },
+  { name:'Cá Đuối Nước Ngọt',   emoji:'🐟', tier:3, minKg:60,   maxKg:140,  minCm:150,maxCm:230, rate:9,  w:30,  color:'#7d6a8a' },
+  { name:'Cá Rồng Thần Long',   emoji:'🐉', tier:4, minKg:120,  maxKg:250,  minCm:220,maxCm:340, rate:11, w:45,  color:'#ff5df2' },
+  { name:'Thủy Quái Cổ Đại',    emoji:'🐋', tier:4, minKg:150,  maxKg:300,  minCm:260,maxCm:420, rate:8,  w:55,  color:'#b44ae0' },
+];
+const RODS = [
+  { name:'Cần Tre',      emoji:'🎋', biteMin:8,  biteMax:20, boost:0    },
+  { name:'Cần VIP',      emoji:'🥇', biteMin:6,  biteMax:15, boost:0.10 },
+  { name:'Cần VIP2',     emoji:'💎', biteMin:5,  biteMax:12, boost:0.20 },
+  { name:'Cần Thần Long',emoji:'🐉', biteMin:4,  biteMax:10, boost:0.35 },
+];
+const SEAT_COUNT = 12;
+const BLESSINGS = ['Chúc bạn cá to đầy giỏ, xu về đầy túi!','Chúc bạn sớm săn được Thủy Quái cổ đại!','Chúc bạn giật phát nào dính phát đó!','Chúc bạn phá kỷ lục hồ câu hôm nay!'];
+
+/* ================= TRẠNG THÁI ================= */
+const anglers = new Map();       // uniqueId -> cần thủ
+const seats = new Array(SEAT_COUNT).fill(null);
+const queue = [];                // uniqueId chờ chỗ
+let totalCatches = 0, totalGiftXu = 0, totalLikesAll = 0;
+let goldenUntil = 0, nextGoldenAt = 200;
+let sessionRecord = null;        // {kg, fish, owner}
+let allTimeRecord = null;
+try { allTimeRecord = JSON.parse(localStorage.getItem('cauca_record') || 'null'); } catch (e) {}
+let soundOn = true, ttsOn = true;
+
+const $ = id => document.getElementById(id);
+const pondWrap = $('pondWrap'), lineSvg = $('lineSvg');
+const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').trim();
+const hashOf = s => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); };
+const fmt = n => n.toLocaleString('vi-VN');
+
+/* ================= ÂM THANH (Web Audio) ================= */
+let actx = null;
+function ac() { if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } if (actx && actx.state === 'suspended') actx.resume(); return actx; }
+function tone(f, t0, dur, type, vol, slideTo) {
+  if (!soundOn) return; const c = ac(); if (!c) return;
+  const o = c.createOscillator(), g = c.createGain(), t = c.currentTime + t0;
+  o.type = type || 'sine'; o.frequency.setValueAtTime(f, t);
+  if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || 0.12, t + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + dur + 0.05);
+}
+const sfx = {
+  cast()  { tone(600, 0, 0.18, 'sine', 0.07, 180); },
+  bite()  { tone(880, 0, 0.12, 'square', 0.08); tone(880, 0.18, 0.12, 'square', 0.08); tone(1174, 0.36, 0.2, 'square', 0.09); },
+  splash(big) { tone(300, 0, 0.3, 'sawtooth', 0.05, 90); tone(520, 0.05, 0.22, 'sine', 0.07, 140); if (big) { tone(660, 0.15, 0.3, 'triangle', 0.1); tone(880, 0.3, 0.4, 'triangle', 0.1); } },
+  escape() { tone(400, 0, 0.35, 'sine', 0.08, 120); },
+  gift()  { tone(784, 0, 0.14, 'triangle', 0.1); tone(988, 0.12, 0.14, 'triangle', 0.1); tone(1318, 0.24, 0.26, 'triangle', 0.11); },
+};
+
+/* ================= GIỌNG ĐỌC (online qua bridge /tts, dự phòng giọng máy) ================= */
+let ttsOnline = false, ttsRetryAt = 0, speechBusy = false;
+const speakQueue = [], lastSpeakAt = new Map();
+function speak(text, uniqueId) {
+  if (!ttsOn) return;
+  const now = Date.now();
+  if (uniqueId && now - (lastSpeakAt.get(uniqueId) || 0) < 5000) return;
+  if (uniqueId) lastSpeakAt.set(uniqueId, now);
+  if (speakQueue.length >= 2) speakQueue.shift();
+  speakQueue.push(text); pumpSpeak();
+}
+async function pumpSpeak() {
+  if (speechBusy || !speakQueue.length) return;
+  speechBusy = true;
+  const text = speakQueue.shift();
+  try {
+    if (ttsOnline && Date.now() > ttsRetryAt && location.protocol.startsWith('http')) {
+      const r = await fetch('/tts?text=' + encodeURIComponent(text));
+      if (!r.ok) throw new Error('tts ' + r.status);
+      const blob = await r.blob();
+      const audio = new Audio(URL.createObjectURL(blob));
+      await new Promise((res, rej) => { audio.onended = res; audio.onerror = rej; audio.play().catch(rej); });
+    } else if ('speechSynthesis' in window) {
+      const vi = speechSynthesis.getVoices().find(v => (v.lang || '').toLowerCase().startsWith('vi'));
+      if (vi) await new Promise(res => { const u = new SpeechSynthesisUtterance(text); u.voice = vi; u.lang = vi.lang; u.onend = res; u.onerror = res; speechSynthesis.speak(u); });
+    }
+  } catch (e) { if (ttsOnline) ttsRetryAt = Date.now() + 15000; }
+  speechBusy = false; pumpSpeak();
+}
+if ('speechSynthesis' in window) speechSynthesis.getVoices();
+
+/* ================= HỒ NƯỚC (canvas) ================= */
+const cv = $('pondCanvas'), cx = cv.getContext('2d');
+let W = 0, H = 0;
+function fitCanvas() { const r = pondWrap.getBoundingClientRect(); W = cv.width = Math.max(50, r.width); H = cv.height = Math.max(50, r.height); }
+window.addEventListener('resize', fitCanvas);
+const pondC = () => ({ x: W * 0.5, y: H * 0.52, rx: W * 0.375, ry: H * 0.345 });
+const seatPos = i => { const a = -Math.PI / 2 + i * (Math.PI * 2 / SEAT_COUNT); return { x: 50 + 47.5 * Math.cos(a), y: 50 + 46 * Math.sin(a), a }; };
+const bobPos = i => { const a = -Math.PI / 2 + i * (Math.PI * 2 / SEAT_COUNT); return { x: 50 + 22 * Math.cos(a), y: 52 + 19.5 * Math.sin(a) }; };
+const ambientFish = [];
+for (let i = 0; i < 11; i++) ambientFish.push({ ang: Math.random() * 6.28, rad: 0.25 + Math.random() * 0.6, spd: (0.08 + Math.random() * 0.2) * (Math.random() < 0.5 ? 1 : -1), size: 7 + Math.random() * 11, color: FISH[i % FISH.length].color, wob: Math.random() * 6.28 });
+const particles = [];
+function drawFishShape(x, y, size, color, dir, wob) {
+  cx.save(); cx.translate(x, y); cx.scale(dir, 1); cx.rotate(Math.sin(wob) * 0.12);
+  cx.fillStyle = color; cx.globalAlpha = 0.85;
+  cx.beginPath(); cx.ellipse(0, 0, size, size * 0.42, 0, 0, 6.29); cx.fill();
+  cx.beginPath(); cx.moveTo(-size * 0.9, 0); cx.lineTo(-size * 1.45, -size * 0.5); cx.lineTo(-size * 1.45, size * 0.5); cx.closePath(); cx.fill();
+  cx.globalAlpha = 1; cx.fillStyle = '#04150a';
+  cx.beginPath(); cx.arc(size * 0.55, -size * 0.1, size * 0.09, 0, 6.29); cx.fill();
+  cx.restore();
+}
+function drawPond(t) {
+  cx.clearRect(0, 0, W, H);
+  const p = pondC();
+  // sàn gỗ quanh hồ
+  cx.save();
+  cx.fillStyle = '#4a2f16'; cx.beginPath(); cx.ellipse(p.x, p.y, p.rx * 1.2, p.ry * 1.2, 0, 0, 6.29); cx.fill();
+  cx.strokeStyle = '#6d4a22'; cx.lineWidth = 3;
+  for (let k = 1; k <= 3; k++) { cx.beginPath(); cx.ellipse(p.x, p.y, p.rx * (1 + k * 0.065), p.ry * (1 + k * 0.065), 0, 0, 6.29); cx.stroke(); }
+  // mặt nước
+  const g = cx.createRadialGradient(p.x, p.y - p.ry * 0.3, 10, p.x, p.y, p.rx);
+  g.addColorStop(0, '#1d7a5f'); g.addColorStop(0.6, '#0d5c46'); g.addColorStop(1, '#073d2d');
+  cx.fillStyle = g; cx.beginPath(); cx.ellipse(p.x, p.y, p.rx, p.ry, 0, 0, 6.29); cx.fill();
+  cx.save(); cx.beginPath(); cx.ellipse(p.x, p.y, p.rx, p.ry, 0, 0, 6.29); cx.clip();
+  // sóng gợn
+  cx.strokeStyle = 'rgba(180,255,220,0.13)'; cx.lineWidth = 1.4;
+  for (let k = 0; k < 4; k++) { const rr = ((t / 2600 + k / 4) % 1); cx.globalAlpha = 0.14 * (1 - rr);
+    cx.beginPath(); cx.ellipse(p.x, p.y, p.rx * rr, p.ry * rr, 0, 0, 6.29); cx.stroke(); }
+  cx.globalAlpha = 1;
+  // cá bơi trong hồ
+  for (const f of ambientFish) {
+    f.ang += f.spd * 0.016;
+    const x = p.x + Math.cos(f.ang) * p.rx * f.rad, y = p.y + Math.sin(f.ang) * p.ry * f.rad;
+    drawFishShape(x, y, f.size, f.color, f.spd > 0 ? (Math.cos(f.ang) > 0 ? 1 : -1) : (Math.cos(f.ang) > 0 ? -1 : 1), t / 300 + f.wob);
+  }
+  // phao của từng cần thủ
+  anglers.forEach(a => {
+    if (a.seat === null || a.state === 'idle') return;
+    const bp = bobPos(a.seat), bx = bp.x / 100 * W, by = bp.y / 100 * H + Math.sin(t / 350 + a.seat) * 2.4;
+    if (a.state === 'biting') {
+      const rr = ((t / 500) % 1);
+      cx.strokeStyle = 'rgba(255,80,80,' + (0.75 * (1 - rr)) + ')'; cx.lineWidth = 2.4;
+      cx.beginPath(); cx.ellipse(bx, by, 6 + rr * 20, (6 + rr * 20) * 0.45, 0, 0, 6.29); cx.stroke();
+      bx += Math.sin(t / 40) * 2.2;
+    }
+    cx.fillStyle = '#fff'; cx.beginPath(); cx.ellipse(bx, by, 4.6, 3.1, 0, 0, 6.29); cx.fill();
+    cx.fillStyle = '#e5322d'; cx.beginPath(); cx.ellipse(bx, by - 1.4, 4.6, 1.7, 0, 0, 6.29); cx.fill();
+  });
+  cx.restore();
+  // hạt nước bắn khi câu được cá
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const pt = particles[i]; pt.x += pt.vx; pt.y += pt.vy; pt.vy += 0.16; pt.life -= 0.02;
+    if (pt.life <= 0) { particles.splice(i, 1); continue; }
+    cx.globalAlpha = Math.max(0, pt.life); cx.fillStyle = pt.color;
+    cx.beginPath(); cx.arc(pt.x, pt.y, pt.r, 0, 6.29); cx.fill();
+  }
+  cx.globalAlpha = 1;
+  requestAnimationFrame(drawPond);
+}
+function splashAt(seatIdx, color, n) {
+  const bp = bobPos(seatIdx), x = bp.x / 100 * W, y = bp.y / 100 * H;
+  for (let i = 0; i < (n || 16); i++) particles.push({ x, y, vx: (Math.random() - 0.5) * 3.4, vy: -1.5 - Math.random() * 2.6, r: 1.4 + Math.random() * 2.4, color: color || '#bffcff', life: 0.7 + Math.random() * 0.5 });
+}
+
+/* ================= GHẾ / NGƯỜI CÂU ================= */
+function seatEl(a) { return pondWrap.querySelector('[data-seat="' + a.seat + '"]'); }
+function buildSeat(a) {
+  const pos = seatPos(a.seat);
+  const el = document.createElement('div');
+  el.className = 'seat'; el.dataset.seat = a.seat;
+  el.style.left = pos.x + '%'; el.style.top = pos.y + '%';
+  const hue = hashOf(a.uniqueId) % 360;
+  el.innerHTML =
+    '<div class="plaque"><span class="ptag"></span> <span class="pname"></span><div class="ptext"></div></div>' +
+    '<div class="avatar" style="background:linear-gradient(145deg,hsl(' + hue + ',65%,45%),hsl(' + ((hue + 50) % 360) + ',70%,30%))">' + (a.nickname || '?').trim().charAt(0).toUpperCase() + '</div>' +
+    '<div><span class="nametag"></span></div><div class="baitlab"></div>';
+  pondWrap.appendChild(el);
+  a.el = el; renderSeat(a); renderLine(a);
+}
+function renderSeat(a) {
+  if (!a.el) return;
+  a.el.querySelector('.nametag').textContent = a.nickname;
+  a.el.querySelector('.baitlab').textContent = RODS[a.rod].emoji + ' ' + RODS[a.rod].name + ' · Mồi: ' + a.bait + ' · 🪙 ' + fmt(a.coins);
+  a.el.classList.toggle('biting', a.state === 'biting');
+}
+function renderLine(a) {
+  let ln = lineSvg.querySelector('[data-line="' + a.seat + '"]');
+  if (a.state === 'idle') { if (ln) ln.remove(); return; }
+  const sp = seatPos(a.seat), bp = bobPos(a.seat);
+  if (!ln) { ln = document.createElementNS('http://www.w3.org/2000/svg', 'line'); ln.dataset.line = a.seat; ln.setAttribute('stroke', 'rgba(255,255,255,0.5)'); ln.setAttribute('stroke-width', '0.35'); lineSvg.appendChild(ln); }
+  ln.setAttribute('x1', sp.x); ln.setAttribute('y1', sp.y); ln.setAttribute('x2', bp.x); ln.setAttribute('y2', bp.y);
+}
+function showPlaque(a, kind, tag, text, ms) {
+  if (!a.el) return;
+  const pl = a.el.querySelector('.plaque');
+  pl.className = 'plaque show ' + (kind || '');
+  pl.querySelector('.ptag').textContent = tag;
+  pl.querySelector('.pname').textContent = a.nickname;
+  pl.querySelector('.ptext').innerHTML = text;
+  clearTimeout(a.plaqueTimer);
+  if (ms) a.plaqueTimer = setTimeout(() => pl.classList.remove('show'), ms);
+}
+function hidePlaque(a) { if (a.el) a.el.querySelector('.plaque').classList.remove('show'); }
+
+/* ================= LOGIC CÂU CÁ ================= */
+function pickFish(a) {
+  const golden = Date.now() < goldenUntil;
+  const tw = [62, 24, 9, 4, 1];
+  for (let t = 1; t < 5; t++) tw[t] *= (1 + RODS[a.rod].boost * (t + 1)) * (golden && t >= 2 ? 1.8 : 1);
+  let sum = tw.reduce((s, v) => s + v, 0), r = Math.random() * sum, tier = 0;
+  for (let t = 0; t < 5; t++) { r -= tw[t]; if (r <= 0) { tier = t; break; } }
+  const inTier = FISH.filter(f => f.tier === tier);
+  let wsum = inTier.reduce((s, f) => s + f.w, 0), wr = Math.random() * wsum;
+  for (const f of inTier) { wr -= f.w; if (wr <= 0) return f; }
+  return inTier[0];
+}
+function getAngler(user) {
+  let a = anglers.get(user.uniqueId);
+  if (!a) {
+    a = { uniqueId: user.uniqueId, nickname: user.nickname || user.uniqueId, seat: null, rod: 0, bait: 10,
+      coins: 0, catches: 0, totalKg: 0, bestKg: 0, state: 'idle', fish: null, biteTimer: null, windowEnd: 0,
+      pullPower: 0, needPulls: 1, el: null, plaqueTimer: null, likeBank: 0, lastActive: Date.now() };
+    anglers.set(user.uniqueId, a);
+  }
+  if (user.nickname) a.nickname = user.nickname;
+  a.lastActive = Date.now();
+  return a;
+}
+function takeSeat(a) {
+  if (a.seat !== null) return true;
+  const free = seats.indexOf(null);
+  if (free === -1) { if (!queue.includes(a.uniqueId)) queue.push(a.uniqueId); setTicker('⏳ Hồ đã đủ 12 cần thủ — ' + a.nickname + ' đang chờ chỗ trống'); return false; }
+  seats[free] = a.uniqueId; a.seat = free; buildSeat(a);
+  return true;
+}
+function castLine(a, silent) {
+  if (a.seat === null && !takeSeat(a)) return;
+  if (a.state !== 'idle') return;
+  if (a.bait <= 0) { showPlaque(a, '', 'HẾT MỒI', 'Tặng quà lấy mồi, hoặc thả đủ 50 tim để nhận +10 mồi!', 4200); return; }
+  a.bait--; a.state = 'waiting'; a.fish = null;
+  const rod = RODS[a.rod];
+  const delay = (rod.biteMin + Math.random() * (rod.biteMax - rod.biteMin)) * (Date.now() < goldenUntil ? 0.75 : 1);
+  clearTimeout(a.biteTimer);
+  a.biteTimer = setTimeout(() => startBite(a), delay * 1000);
+  if (!silent) { sfx.cast(); showPlaque(a, '', 'ĐÃ QUĂNG CẦN', 'Phao đã thả… chờ cá cắn, cá cắn là thả tim hoặc chat “giật” ngay!', 3200); }
+  renderSeat(a); renderLine(a); updateBoards();
+}
+function startBite(a) {
+  if (a.state !== 'waiting') return;
+  a.fish = pickFish(a);
+  a.state = 'biting';
+  const isBoss = a.fish.tier === 4;
+  a.needPulls = isBoss ? 3 : 1; a.pullPower = 0;
+  const winSec = isBoss ? 9 : Math.max(3.5, 6 - a.fish.tier * 0.5);
+  a.windowEnd = Date.now() + winSec * 1000;
+  sfx.bite(); renderSeat(a); updateBoards();
+}
+function pull(a, source) {
+  // Boss của người khác: cả phòng phụ kéo
+  if (a.state !== 'biting') {
+    for (const o of anglers.values()) {
+      if (o !== a && o.state === 'biting' && o.fish && o.fish.tier === 4) {
+        o.pullPower += 1;
+        showPlaque(o, 'bite', 'CẦN! PHỤ KÉO', 'Lực kéo <span class="bignum">' + o.pullPower + '/' + o.needPulls + '</span> — cả phòng thả tim / chat “giật” phụ!', 900);
+        if (o.pullPower >= o.needPulls) landFish(o, 'cả phòng phụ kéo');
+        return;
+      }
+    }
+  }
+  if (a.state === 'biting') {
+    a.pullPower += (a.fish.tier === 4 ? 2 : 1);
+    if (a.pullPower >= a.needPulls) landFish(a, source);
+    else showPlaque(a, 'bite', 'CẦN! KÉO TIẾP', 'Lực kéo <span class="bignum">' + a.pullPower + '/' + a.needPulls + '</span> — thả tim / “giật” tiếp!', 900);
+    return;
+  }
+  if (a.state === 'waiting') {
+    // Giật sớm: cá hoảng, phao phải chờ lại (không mất thêm mồi)
+    clearTimeout(a.biteTimer);
+    a.biteTimer = setTimeout(() => startBite(a), 3500 + Math.random() * 3000);
+    showPlaque(a, '', 'GIẬT SỚM!', 'Cá chưa cắn mà đã giật — cá hoảng, chờ phao cắn lại…', 2600);
+  }
+}
+function landFish(a, source) {
+  const f = a.fish; if (!f) return;
+  const ratio = Math.pow(Math.random(), 1.25);
+  const kg = +(f.minKg + (f.maxKg - f.minKg) * ratio).toFixed(2);
+  const cm = Math.round(f.minCm + (f.maxCm - f.minCm) * ratio);
+  const golden = Date.now() < goldenUntil;
+  const coins = Math.round(kg * f.rate * (golden ? 2 : 1));
+  a.catches++; a.totalKg = +(a.totalKg + kg).toFixed(2); a.coins += coins;
+  if (kg > a.bestKg) a.bestKg = kg;
+  totalCatches++;
+  a.state = 'idle'; a.fish = null; clearTimeout(a.biteTimer);
+  splashAt(a.seat, TIERS[f.tier].color, f.tier >= 3 ? 34 : 18);
+  sfx.splash(f.tier >= 2);
+  hidePlaque(a); renderSeat(a); renderLine(a);
+  showCatchCard(a, f, kg, cm, coins, source);
+  const brokeRecord = !sessionRecord || kg > sessionRecord.kg;
+  if (brokeRecord) {
+    sessionRecord = { kg, fish: f.name, owner: a.nickname };
+    if (!allTimeRecord || kg > allTimeRecord.kg) {
+      allTimeRecord = sessionRecord;
+      try { localStorage.setItem('cauca_record', JSON.stringify(allTimeRecord)); } catch (e) {}
+    }
+  }
+  if (f.tier >= 2 || brokeRecord) {
+    speak((brokeRecord ? 'Kỷ lục mới! ' : '') + a.nickname + ' vừa câu được ' + f.name + ' nặng ' + String(kg).replace('.', ' phẩy ') + ' ký, cộng ' + coins + ' xu. Chúc mừng!', a.uniqueId);
+  }
+  setTicker('🎣 ' + a.nickname + ' câu được ' + f.emoji + ' ' + f.name + ' · ' + kg + ' kg · ' + cm + ' cm · +' + coins + ' xu' + (brokeRecord ? ' · 🏆 KỶ LỤC MỚI!' : ''));
+  updateBoards();
+}
+function escapeFish(a) {
+  const f = a.fish;
+  a.state = 'idle'; a.fish = null;
+  sfx.escape(); hidePlaqueSoon(a);
+  showPlaque(a, '', 'CÁ CHẠY MẤT!', (f ? f.emoji + ' ' + f.name + ' ' : '') + 'tuột khỏi lưỡi rồi… Chat “câu cá” để quăng lại nhé!', 3600);
+  setTicker('💨 Cá của ' + a.nickname + ' đã chạy mất — chậm một nhịp thôi!');
+  renderSeat(a); renderLine(a); updateBoards();
+}
+function hidePlaqueSoon(a) { /* giữ plaque thông báo thoát cá */ }
+
+/* Thẻ cá câu được ở giữa hồ */
+let catchCardTimer = null;
+function showCatchCard(a, f, kg, cm, coins, source) {
+  const card = $('catchCard'), tier = TIERS[f.tier];
+  card.style.background = '#12060ee8'; card.style.border = '2px solid ' + tier.color; card.style.boxShadow = '0 0 18px ' + tier.color + '88';
+  card.innerHTML =
+    '<div class="cfish" style="color:' + tier.color + '">' + f.emoji + ' ' + f.name + '</div>' +
+    '<div class="cdetail">⚖ ' + kg + ' kg · 📏 ' + cm + ' cm · <span style="color:#ffd94d;font-weight:800">+' + fmt(coins) + ' xu</span> <span style="opacity:.75">(' + tier.name + ')</span></div>' +
+    '<div class="cowner">🎣 ' + a.nickname + ' · kéo lên bằng ' + (source === 'tim' ? 'thả tim ❤️' : source === 'chat' ? 'chat “giật”' : source) + '</div>';
+  card.classList.add('show');
+  clearTimeout(catchCardTimer);
+  catchCardTimer = setTimeout(() => card.classList.remove('show'), f.tier >= 3 ? 6000 : 4200);
+}
+
+/* ================= BẢNG & TICKER ================= */
+function setTicker(t) { $('ticker').textContent = t; }
+function updateBoards() {
+  let top = null, biting = 0, seated = 0;
+  anglers.forEach(a => {
+    if (a.seat !== null) seated++;
+    if (a.state === 'biting') biting++;
+    if (a.catches > 0 && (!top || a.totalKg > top.totalKg)) top = a;
+  });
+  $('topAngler').textContent = top ? top.nickname : '—';
+  $('topAnglerSub').textContent = top ? ('🎣 ' + top.catches + ' con · Tổng ' + top.totalKg + ' kg · 🪙 ' + fmt(top.coins) + ' xu') : 'Chưa ai câu được cá';
+  const rec = sessionRecord || allTimeRecord;
+  $('recordFish').textContent = rec ? (rec.fish + ' ' + rec.kg + ' kg') : '—';
+  $('recordSub').textContent = rec ? ('của ' + rec.owner + (sessionRecord ? ' · kỷ lục phiên này' : ' · kỷ lục đã lưu')) : '';
+  $('statAnglers').textContent = seated;
+  $('statBiting').textContent = biting;
+  $('goldenBanner').style.display = Date.now() < goldenUntil ? 'block' : 'none';
+}
+
+/* Vòng lặp hiển thị đếm ngược phao cắn + dọn ghế treo */
+setInterval(() => {
+  const now = Date.now();
+  anglers.forEach(a => {
+    if (a.state === 'biting') {
+      const left = Math.max(0, (a.windowEnd - now) / 1000);
+      if (left <= 0) { escapeFish(a); return; }
+      const isBoss = a.fish.tier === 4;
+      showPlaque(a, 'bite', isBoss ? '🐋 THỦY QUÁI CẮN! CẢ PHÒNG PHỤ KÉO' : 'CẮN! THẢ TIM ❤️ HOẶC CHAT “GIẬT”',
+        a.fish.emoji + ' ' + a.fish.name + ' đang cắn — còn <span class="bignum">' + Math.ceil(left) + 's</span>' +
+        (isBoss ? ' · Lực kéo ' + a.pullPower + '/' + a.needPulls : ''), 0);
+      clearTimeout(a.plaqueTimer); // plaque cắn câu không tự tắt giữa chừng
+    }
+    // treo quá 3 phút khi đang rảnh -> nhường chỗ cho hàng chờ
+    if (a.seat !== null && a.state === 'idle' && now - a.lastActive > 180000) {
+      seats[a.seat] = null;
+      if (a.el) { a.el.remove(); a.el = null; }
+      const ln = lineSvg.querySelector('[data-line="' + a.seat + '"]'); if (ln) ln.remove();
+      a.seat = null;
+      const nextId = queue.shift();
+      if (nextId && anglers.get(nextId)) { const nx = anglers.get(nextId); if (takeSeat(nx)) { showPlaque(nx, '', 'ĐÃ CÓ CHỖ!', 'Chat “câu cá” để quăng cần nhé!', 3500); } }
+      updateBoards();
+    }
+  });
+  if (goldenUntil && now > goldenUntil && $('goldenBanner').style.display !== 'none') updateBoards();
+}, 200);
+
+/* ================= XỬ LÝ SỰ KIỆN TỪ CẦU NỐI ================= */
+function handleChat(user, text) {
+  const a = getAngler(user);
+  const n = norm(text);
+  if (n === 'cau ca' || n.startsWith('cau ca')) { castLine(a); return; }
+  if (n === 'giat' || n.startsWith('giat')) { pull(a, 'chat'); return; }
+  if (a.seat !== null) showPlaque(a, '', 'CHAT', '<span class="ptext">“' + String(text).slice(0, 60).replace(/</g, '&lt;') + '”</span>', 3000);
+}
+function handleLike(user, likes) {
+  const a = getAngler(user);
+  totalLikesAll += likes || 1;
+  // Thả tim cũng là giật cá
+  if (a.state === 'biting' || [...anglers.values()].some(o => o.state === 'biting' && o.fish && o.fish.tier === 4)) pull(a, 'tim');
+  // tích tim đổi mồi: mỗi 50 tim của chính người đó -> +10 mồi
+  a.likeBank += likes || 1;
+  if (a.likeBank >= 50) { a.likeBank -= 50; a.bait += 10; if (a.seat !== null) { showPlaque(a, '', 'THƯỞNG TIM ❤️', '+10 mồi nhờ thả tim nhiệt tình!', 3000); renderSeat(a); } }
+}
+function handleGift(user, giftName, giftCount, diamonds) {
+  const a = getAngler(user);
+  if (a.seat === null) takeSeat(a);
+  const xu = Math.max(1, diamonds || 1) * (giftCount || 1);
+  totalGiftXu += xu;
+  let msg = '', baitGain = 0, rewardVoice = '';
+  if (xu >= 500) { a.rod = 3; msg = 'lên thẳng Cần Thần Long 🐉'; rewardVoice = 'Bạn được lên thẳng Cần Thần Long'; }
+  else if (xu >= 100) { a.rod = Math.max(a.rod, 2); msg = 'lên Cần VIP2 💎'; rewardVoice = 'Bạn được lên Cần VIP 2'; }
+  else if (xu >= 30) { a.rod = Math.max(a.rod, 1); msg = 'lên Cần VIP 🥇'; rewardVoice = 'Bạn được lên Cần VIP'; }
+  else if (xu >= 5) { baitGain = 50; a.bait += baitGain; msg = '+50 mồi VIP'; }
+  else { baitGain = 50; a.bait += baitGain; msg = '+50 mồi'; }
+  if (baitGain > 0) rewardVoice = 'Cảm ơn bạn đã mua ' + baitGain + ' mồi';
+  sfx.gift(); renderSeat(a);
+  showPlaque(a, 'catchp', 'CẢM ƠN QUÀ 🎁', giftName + ' ×' + (giftCount || 1) + ' → ' + msg + '!', 5000);
+  speak('Cảm ơn ' + a.nickname + ' đã tặng ' + giftName + '. ' + rewardVoice + '. ' + BLESSINGS[hashOf(a.uniqueId + totalGiftXu) % BLESSINGS.length], a.uniqueId);
+  setTicker('🎁 ' + a.nickname + ' tặng ' + giftName + ' ×' + (giftCount || 1) + ' → ' + msg + ' · Tổng quà phiên: ' + fmt(totalGiftXu) + ' xu');
+  if (totalGiftXu >= nextGoldenAt) {
+    nextGoldenAt += 200; goldenUntil = Date.now() + 5 * 60000;
+    setTicker('⏰ GIỜ VÀNG đã mở 5 phút: x2 xu mọi con cá, cá hồi vàng xuất hiện nhiều hơn!');
+    speak('Giờ vàng đã mở! Năm phút nhân đôi xu cho mọi con cá câu được!', '');
+  }
+  updateBoards();
+  if (a.state === 'idle' && a.seat !== null) setTimeout(() => castLine(a, true), 600);
+}
+function handleEvent(ev) {
+  if (!ev || !ev.type) return;
+  if (ev.type === 'status') {
+    const el = $('connStatus');
+    el.textContent = (ev.ok ? '🟢 ' : '🔴 ') + (ev.text || '');
+    el.classList.toggle('bad', !ev.ok);
+    if (ev.tts === 'online') ttsOnline = true;
+  }
+  else if (ev.type === 'viewers') $('viewersBox').textContent = '👁 ' + fmt(ev.viewers || 0);
+  else if (ev.type === 'join' && ev.user) setTicker('👋 ' + (ev.user.nickname || ev.user.uniqueId) + ' vừa vào hồ — chat “câu cá” để nhận cần miễn phí!');
+  else if (ev.type === 'chat' && ev.user) handleChat(ev.user, ev.text || '');
+  else if (ev.type === 'like' && ev.user) handleLike(ev.user, ev.likes || 1);
+  else if (ev.type === 'gift' && ev.user) handleGift(ev.user, ev.giftName || 'Quà', ev.giftCount || 1, ev.diamonds || 1);
+  else if (ev.type === 'follow' && ev.user) { const a = getAngler(ev.user); a.bait += 5; setTicker('⭐ ' + a.nickname + ' vừa theo dõi — tặng +5 mồi!'); if (a.seat !== null) renderSeat(a); }
+  else if (ev.type === 'share' && ev.user) setTicker('🔁 ' + (ev.user.nickname || '') + ' vừa chia sẻ buổi live — cảm ơn bạn!');
+}
+
+/* ================= KẾT NỐI WEBSOCKET ================= */
+function connectWS() {
+  if (!location.protocol.startsWith('http')) { $('connStatus').textContent = '🟡 Đang mở file trực tiếp — bấm Panel để chạy Demo'; $('connStatus').classList.add('bad'); return; }
+  let ws;
+  try { ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host); }
+  catch (e) { setTimeout(connectWS, 3000); return; }
+  ws.onmessage = m => { try { handleEvent(JSON.parse(m.data)); } catch (e) {} };
+  ws.onclose = () => { $('connStatus').textContent = '🔴 Mất kết nối cầu nối — đang nối lại…'; $('connStatus').classList.add('bad'); setTimeout(connectWS, 3000); };
+}
+
+/* ================= DEMO TRONG TRANG ================= */
+let demoTimer = null;
+const demoUsers = ['Tuấn Anh Coca','ngọc lê926','Minh Anh','Thu Hằng','Văn Đức','Ngọc Trâm','Hoàng Nam','Diệu Hoa'].map(n => ({ uniqueId: 'demo_' + n.replace(/\s/g, ''), nickname: n }));
+function demoStep() {
+  const u = demoUsers[Math.floor(Math.random() * demoUsers.length)];
+  const biting = [...anglers.values()].filter(a => a.state === 'biting');
+  const r = Math.random();
+  if (biting.length && r < 0.45) {
+    const owner = biting[Math.floor(Math.random() * biting.length)];
+    const ou = { uniqueId: owner.uniqueId, nickname: owner.nickname };
+    if (Math.random() < 0.5) handleLike(ou, 3); else handleChat(ou, 'giật');
+    if (owner.fish && owner.fish.tier === 4) handleLike(u, 2); // người khác phụ kéo boss
+  }
+  else if (r < 0.72) handleChat(u, 'câu cá');
+  else if (r < 0.84) handleLike(u, 2 + Math.floor(Math.random() * 5));
+  else if (r < 0.93) handleChat(u, ['câu cá thôi cả nhà','phao động rồi kìa','cố lên giật đi','hồ nay nhiều cá khủng quá'][Math.floor(Math.random() * 4)]);
+  else handleGift(u, ['Hoa hồng','Trái tim tình yêu','Bánh donut','Vương miện'][Math.floor(Math.random() * 4)], 1, [1, 5, 30, 100][Math.floor(Math.random() * 4)]);
+  handleEvent({ type: 'viewers', viewers: 40 + anglers.size * 6 + Math.floor(Math.random() * 30) });
+}
+function toggleDemo(force) {
+  const on = force !== undefined ? force : !demoTimer;
+  if (on && !demoTimer) { demoTimer = setInterval(demoStep, 1700); demoStep(); $('btnDemo').textContent = '⏹ Tắt giả lập Demo'; setTicker('🧪 Đang chạy giả lập Demo trong trang — người xem ảo đang câu cá'); }
+  if (!on && demoTimer) { clearInterval(demoTimer); demoTimer = null; $('btnDemo').textContent = '🧪 Bật giả lập Demo (test không cần live)'; }
+}
+
+/* ================= PANEL & NÚT ================= */
+$('btnPanel').onclick = () => $('panel').classList.toggle('show');
+$('btnVoice').onclick = () => { ttsOn = !ttsOn; $('btnVoice').classList.toggle('off', !ttsOn); $('btnVoice').textContent = ttsOn ? '🔊 Giọng Nói' : '🔇 Giọng Nói'; $('btnTts').textContent = '🗣 Đọc cảm ơn / cá khủng: ' + (ttsOn ? 'Bật' : 'Tắt'); };
+$('btnDemo').onclick = () => toggleDemo();
+$('btnSound').onclick = () => { soundOn = !soundOn; $('btnSound').textContent = '🔔 Âm thanh: ' + (soundOn ? 'Bật' : 'Tắt'); if (soundOn) ac(); };
+$('btnTts').onclick = () => $('btnVoice').click();
+$('btnResetRec').onclick = () => { allTimeRecord = null; sessionRecord = null; try { localStorage.removeItem('cauca_record'); } catch (e) {} updateBoards(); };
+
+fitCanvas();
+requestAnimationFrame(drawPond);
+updateBoards();
+connectWS();
+if (new URLSearchParams(location.search).has('demo')) toggleDemo(true);
+setTimeout(fitCanvas, 300);
+</script>
+</body>
+</html>

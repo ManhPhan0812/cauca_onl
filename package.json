@@ -1,0 +1,1 @@
+{"dependencies":{"https-proxy-agent":"^9.1.0","msedge-tts":"^2.1.1","tiktok-live-connector":"^2.0.0","ws":"^8.18.0"},"description":"Cầu nối TikTok LIVE cho sân khấu Hồ Câu Săn Thủy Quái (live.html)","main":"bridge.js","name":"cauca-live-bridge","private":true,"scripts":{"demo":"node bridge.js --demo","start":"node bridge.js"},"version":"1.0.0"}
